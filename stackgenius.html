@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Stack Genius | DS Project</title>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    :root{
+      --bg:#0a0c10;--surface:#12161f;--surface2:#1a2030;
+      --accent:#00e5c4;--accent2:#7c5cfc;--text:#e8eaf0;--muted:#6b7280;
+      --border:#2a3040;--danger:#ff4f70;--warn:#ffaa00;
+    }
+    body{background:var(--bg);color:var(--text);font-family:'Outfit',sans-serif;min-height:100vh;overflow-x:hidden;}
+    .page{display:none;min-height:90vh;animation:fadeIn .4s ease;}
+    .page.active{display:block;}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+    .nav{display:flex;align-items:center;gap:6px;padding:14px 20px;background:var(--surface);border-bottom:1px solid var(--border);flex-wrap:wrap;}
+    .nav-btn{background:none;border:1px solid var(--border);color:var(--muted);font-family:'Outfit',sans-serif;font-size:12px;padding:6px 14px;border-radius:20px;cursor:pointer;transition:all .2s;}
+    .nav-btn:hover,.nav-btn.active{border-color:var(--accent);color:var(--accent);background:rgba(0,229,196,.08);}
+    .nav-logo{font-family:'Share Tech Mono';color:var(--accent);font-size:15px;margin-right:10px;}
+    .intro-hero{padding:80px 24px 40px;text-align:center;position:relative;}
+    .intro-hero::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:400px;height:400px;background:radial-gradient(circle,rgba(124,92,252,.18) 0%,transparent 70%);pointer-events:none;}
+    .badge{display:inline-block;background:rgba(0,229,196,.1);border:1px solid rgba(0,229,196,.3);color:var(--accent);font-size:11px;font-family:'Share Tech Mono';padding:4px 14px;border-radius:20px;margin-bottom:20px;letter-spacing:1px;}
+    .hero-title{font-size:clamp(32px,7vw,60px);font-weight:700;line-height:1.1;margin-bottom:16px;}
+    .hero-title span{color:var(--accent);}
+    .hero-sub{color:var(--muted);font-size:16px;max-width:500px;margin:0 auto 36px;line-height:1.7;}
+    .hero-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+    .btn-primary{background:var(--accent);color:#0a0c10;border:none;font-family:'Outfit',sans-serif;font-weight:600;font-size:14px;padding:13px 30px;border-radius:8px;cursor:pointer;transition:all .2s;}
+    .btn-primary:hover{background:#00c4a8;transform:translateY(-1px);}
+    .btn-ghost{background:none;color:var(--text);border:1px solid var(--border);font-family:'Outfit',sans-serif;font-size:14px;padding:13px 30px;border-radius:8px;cursor:pointer;transition:all .2s;}
+    .btn-ghost:hover{border-color:var(--accent2);color:var(--accent2);}
+    .info-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:16px 24px 50px;max-width:900px;margin:0 auto;}
+    .info-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 10px;text-align:center;}
+    .info-card .ic{font-size:20px;margin-bottom:6px;}
+    .info-card h4{font-size:12px;font-weight:600;color:var(--text);margin-bottom:3px;}
+    .info-card p{font-size:11px;color:var(--muted);line-height:1.4;}
+    .mod-header{padding:40px 28px 16px;}
+    .mod-tag{font-family:'Share Tech Mono';font-size:11px;color:var(--accent2);letter-spacing:1px;margin-bottom:8px;}
+    .mod-title{font-size:26px;font-weight:700;margin-bottom:6px;}
+    .mod-desc{font-size:13px;color:var(--muted);line-height:1.6;}
+    .mod-body{padding:0 28px 40px;}
+    .stack-vis{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:20px;}
+    .stack-label{font-family:'Share Tech Mono';font-size:11px;color:var(--muted);margin-bottom:12px;letter-spacing:1px;}
+    .stack-cells{display:flex;flex-direction:column-reverse;gap:6px;min-height:160px;justify-content:flex-start;align-items:flex-start;}
+    .stack-cell{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:10px 20px;font-family:'Share Tech Mono';font-size:14px;color:var(--accent);display:flex;align-items:center;gap:10px;transition:all .3s;animation:slideIn .25s ease;}
+    .stack-cell.top{border-color:var(--accent);background:rgba(0,229,196,.08);}
+    @keyframes slideIn{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:translateX(0)}}
+    .stack-idx{font-size:11px;color:var(--muted);}
+    .stack-empty{color:var(--muted);font-family:'Share Tech Mono';font-size:13px;padding:20px 0;}
+    .ctrl-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;}
+    .ctrl-input{background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:'Share Tech Mono';font-size:14px;padding:9px 14px;border-radius:6px;width:110px;outline:none;}
+    .ctrl-input:focus{border-color:var(--accent);}
+    .btn-sm{background:none;border:1px solid var(--border);color:var(--text);font-family:'Outfit',sans-serif;font-size:13px;padding:9px 18px;border-radius:6px;cursor:pointer;transition:all .2s;}
+    .btn-sm:hover{border-color:var(--accent);color:var(--accent);}
+    .btn-sm.danger:hover{border-color:var(--danger);color:var(--danger);}
+    .status-msg{font-family:'Share Tech Mono';font-size:12px;color:var(--warn);margin-top:10px;min-height:20px;}
+    .expr-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:16px;}
+    .expr-input{background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:'Share Tech Mono';font-size:14px;padding:11px 16px;border-radius:8px;flex:1;min-width:200px;outline:none;}
+    .expr-input:focus{border-color:var(--accent2);}
+    .result-box{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px 22px;margin-bottom:16px;}
+    .result-label{font-family:'Share Tech Mono';font-size:11px;color:var(--muted);margin-bottom:6px;letter-spacing:1px;}
+    .result-val{font-family:'Share Tech Mono';font-size:20px;color:var(--accent2);}
+    .steps-header{font-family:'Share Tech Mono';font-size:11px;color:var(--muted);margin-bottom:8px;letter-spacing:1px;}
+    .step-row{display:flex;gap:10px;align-items:flex-start;font-size:12px;font-family:'Share Tech Mono';padding:8px 12px;background:var(--surface);border:1px solid var(--border);border-radius:6px;margin-bottom:4px;}
+    .step-ch{color:var(--accent);min-width:24px;}
+    .step-act{color:var(--muted);flex:1;}
+    .step-stk{color:var(--accent2);}
+    .step-out{color:var(--warn);}
+    .step-grid-header{font-family:'Share Tech Mono';font-size:11px;display:grid;grid-template-columns:30px 1fr 80px 80px;gap:4px;color:var(--muted);padding:4px 12px;margin-bottom:2px;}
+    .calc-wrap{max-width:420px;}
+    .calc-display{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:22px;margin-bottom:16px;}
+    .calc-infix{font-family:'Share Tech Mono';font-size:13px;color:var(--muted);margin-bottom:4px;min-height:20px;}
+    .calc-postfix{font-family:'Share Tech Mono';font-size:11px;color:var(--accent2);margin-bottom:12px;min-height:18px;}
+    .calc-result{font-family:'Share Tech Mono';font-size:36px;color:var(--text);text-align:right;}
+    .calc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+    .calc-btn{background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:'Outfit',sans-serif;font-size:17px;font-weight:500;padding:18px 8px;border-radius:8px;cursor:pointer;transition:all .15s;}
+    .calc-btn:hover{background:var(--surface2);border-color:var(--accent);}
+    .calc-btn.op{color:var(--accent);border-color:rgba(0,229,196,.3);}
+    .calc-btn.eq{background:var(--accent);color:#0a0c10;border-color:var(--accent);font-weight:700;}
+    .calc-btn.eq:hover{background:#00c4a8;}
+    .calc-btn.clr{color:var(--danger);border-color:rgba(255,79,112,.3);}
+    .calc-btn:active{transform:scale(.96);}
+    .about-section{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:22px;margin-bottom:16px;}
+    .about-section h3{font-size:15px;font-weight:600;color:var(--accent);margin-bottom:10px;}
+    .about-section p,.about-section li{font-size:13px;color:var(--muted);line-height:1.8;}
+    .about-section ul{padding-left:20px;}
+    .code-block{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px;font-family:'Share Tech Mono';font-size:12px;color:#8be0c6;line-height:1.8;margin-top:10px;overflow-x:auto;}
+    .nav-card{transition:border-color .2s,background .2s;}
+    .nav-card:hover{border-color:var(--accent);background:rgba(0,229,196,.06);}
+    @media(max-width:600px){
+      .info-grid{grid-template-columns:repeat(2,1fr);}
+      #page-eval .mod-body{grid-template-columns:1fr!important;}
+    }
+    .team-row{display:flex;gap:12px;align-items:center;margin-top:10px;}
+    .avatar{width:48px;height:48px;border-radius:50%;background:var(--accent2);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;color:#fff;flex-shrink:0;}
+    .team-info h4{font-size:15px;font-weight:600;}
+    .team-info p{font-size:12px;color:var(--muted);}
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <span class="nav-logo" onclick="showPage('intro')" style="cursor:pointer;display:flex;align-items:center;gap:6px;">
+    <svg width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:middle;">
+      <rect x="4" y="22" width="24" height="5" rx="2" fill="#00e5c4" opacity="0.9"/>
+      <rect x="4" y="15" width="24" height="5" rx="2" fill="#00e5c4" opacity="0.65"/>
+      <rect x="4" y="8" width="24" height="5" rx="2" fill="#00e5c4" opacity="0.4"/>
+      <polygon points="29,10.5 33,10.5 31,7" fill="#7c5cfc"/>
+    </svg>Stack Genius
+  </span>
+  <span id="nav-back" style="display:none;margin-left:auto;">
+    <button class="nav-btn" onclick="showPage('intro')" style="display:flex;align-items:center;gap:5px;">← Home</button>
+  </span>
+</nav>
+
+<!-- HOME PAGE -->
+<div id="page-intro" class="page active">
+  <div class="intro-hero">
+    <div class="badge">STACK GENIUS · C PROGRAM</div>
+    <h1 class="hero-title">Stack<br><span>Genius</span></h1>
+    <p class="hero-sub">A complete C project demonstrating Stack — Input, Conversion (Infix→Postfix), and Evaluation modules all powered by the Stack data structure.</p>
+    <div class="hero-btns">
+      <button class="btn-primary" onclick="showPage('eval')">Try the Calculator</button>
+    </div>
+  </div>
+  <div class="info-grid">
+    <div class="info-card nav-card" onclick="showPage('input')" style="cursor:pointer;">
+      <div class="ic">⌨️</div><h4>Input Module</h4><p>Enter &amp; validate your infix expression</p>
+      <div style="margin-top:8px;font-size:10px;font-family:'Share Tech Mono';color:var(--accent);letter-spacing:1px;">OPEN →</div>
+    </div>
+    <div class="info-card nav-card" onclick="showPage('convert')" style="cursor:pointer;">
+      <div class="ic">🔁</div><h4>Conversion Module</h4><p>Infix → Postfix with stack trace</p>
+      <div style="margin-top:8px;font-size:10px;font-family:'Share Tech Mono';color:var(--accent);letter-spacing:1px;">OPEN →</div>
+    </div>
+    <div class="info-card nav-card" onclick="showPage('eval')" style="cursor:pointer;">
+      <div class="ic">🧮</div><h4>Evaluation Module</h4><p>Stack-based expression evaluator</p>
+      <div style="margin-top:8px;font-size:10px;font-family:'Share Tech Mono';color:var(--accent);letter-spacing:1px;">OPEN →</div>
+    </div>
+    <div class="info-card nav-card" onclick="showPage('about')" style="cursor:pointer;">
+      <div class="ic">📋</div><h4>About</h4><p>Project info, algorithm &amp; source code</p>
+      <div style="margin-top:8px;font-size:10px;font-family:'Share Tech Mono';color:var(--accent);letter-spacing:1px;">OPEN →</div>
+    </div>
+  </div>
+</div>
+
+<!-- INPUT MODULE -->
+<div id="page-input" class="page">
+  <div class="mod-header">
+    <div class="mod-tag">MODULE 01 · INPUT</div>
+    <div class="mod-title">Input Module</div>
+    <div class="mod-desc">Enter your infix expression here. The module validates your input, checks for balanced parentheses, and passes it to the next stage.</div>
+  </div>
+  <div class="mod-body">
+    <div class="stack-vis">
+      <div class="stack-label">ENTER INFIX EXPRESSION</div>
+      <div class="expr-row" style="margin-bottom:0;">
+        <input class="expr-input" id="inputExpr" placeholder="e.g. (3+5)*2-4" style="font-size:18px;padding:14px 18px;" />
+        <button class="btn-primary" onclick="doValidate()">Validate ✓</button>
+      </div>
+      <div class="status-msg" id="inputStatus" style="margin-top:14px;font-size:13px;"></div>
+    </div>
+    <div class="result-box" id="inputResult" style="display:none;">
+      <div class="result-label">VALIDATED INPUT</div>
+      <div class="result-val" id="inputDisplay" style="font-size:24px;margin-bottom:16px;"></div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:16px;">
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center;">
+          <div style="font-family:'Share Tech Mono';font-size:10px;color:var(--muted);margin-bottom:4px;">LENGTH</div>
+          <div style="font-family:'Share Tech Mono';font-size:20px;color:var(--accent);" id="inputLen">0</div>
+        </div>
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center;">
+          <div style="font-family:'Share Tech Mono';font-size:10px;color:var(--muted);margin-bottom:4px;">OPERANDS</div>
+          <div style="font-family:'Share Tech Mono';font-size:20px;color:var(--accent);" id="inputOperands">0</div>
+        </div>
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center;">
+          <div style="font-family:'Share Tech Mono';font-size:10px;color:var(--muted);margin-bottom:4px;">OPERATORS</div>
+          <div style="font-family:'Share Tech Mono';font-size:20px;color:var(--accent2);" id="inputOperators">0</div>
+        </div>
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center;">
+          <div style="font-family:'Share Tech Mono';font-size:10px;color:var(--muted);margin-bottom:4px;">BRACKETS</div>
+          <div style="font-family:'Share Tech Mono';font-size:20px;color:var(--accent2);" id="inputBrackets">✓</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <button class="btn-primary" onclick="sendToConvert()">Send to Conversion Module →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CONVERSION MODULE -->
+<div id="page-convert" class="page">
+  <div class="mod-header">
+    <div class="mod-tag">MODULE 02 · CONVERSION</div>
+    <div class="mod-title">Conversion Module</div>
+    <div class="mod-desc">Converts your infix expression to postfix using a stack (LIFO). Watch the stack change live with every character processed.</div>
+  </div>
+  <div class="mod-body">
+    <div class="expr-row">
+      <input class="expr-input" id="infixIn" placeholder="e.g. (A+B)*C-D  or  (3+5)*2" />
+      <button class="btn-primary" onclick="doConvert()">Convert →</button>
+    </div>
+    <!-- Live Stack Visual -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;">
+      <div class="stack-vis">
+        <div class="stack-label">▲ OPERATOR STACK (live)</div>
+        <div class="stack-cells" id="convStackCells" style="min-height:120px;">
+          <div class="stack-empty">Stack will appear here</div>
+        </div>
+      </div>
+      <div class="result-box" id="convertResult" style="display:none;margin-bottom:0;">
+        <div class="result-label">INFIX INPUT</div>
+        <div class="result-val" id="resInfix" style="margin-bottom:12px;"></div>
+        <div class="result-label">POSTFIX OUTPUT</div>
+        <div class="result-val" id="resPostfix"></div>
+      </div>
+    </div>
+    <!-- Step trace -->
+    <div id="stepsContainer"></div>
+    <div style="margin-top:14px;" id="convertSendBtn" style="display:none;">
+      <button class="btn-primary" onclick="sendToEval()" style="display:none;" id="sendEvalBtn">Send to Evaluation Module →</button>
+    </div>
+  </div>
+</div>
+
+<!-- EVALUATION MODULE -->
+<div id="page-eval" class="page">
+  <div class="mod-header">
+    <div class="mod-tag">MODULE 03 · EVALUATION</div>
+    <div class="mod-title">Evaluation Module</div>
+    <div class="mod-desc">Evaluates a postfix expression using a stack. Push operands; when operator is found, pop two and compute. Uses the Stack data structure internally.</div>
+  </div>
+  <div class="mod-body" style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;">
+    <!-- Left: Calculator Input -->
+    <div>
+      <div class="stack-label" style="margin-bottom:10px;">ENTER EXPRESSION</div>
+      <div class="calc-wrap" style="max-width:100%;">
+        <div class="calc-display">
+          <div class="calc-infix" id="calcInfix">Enter an expression...</div>
+          <div class="calc-postfix" id="calcPostfix"></div>
+          <div class="calc-result" id="calcResult">0</div>
+        </div>
+        <div class="calc-grid">
+          <button class="calc-btn clr" onclick="calcClear()">C</button>
+          <button class="calc-btn clr" onclick="calcBack()">⌫</button>
+          <button class="calc-btn op" onclick="calcAppend('(')">(</button>
+          <button class="calc-btn op" onclick="calcAppend(')')">)</button>
+          <button class="calc-btn" onclick="calcAppend('7')">7</button>
+          <button class="calc-btn" onclick="calcAppend('8')">8</button>
+          <button class="calc-btn" onclick="calcAppend('9')">9</button>
+          <button class="calc-btn op" onclick="calcAppend('*')">×</button>
+          <button class="calc-btn" onclick="calcAppend('4')">4</button>
+          <button class="calc-btn" onclick="calcAppend('5')">5</button>
+          <button class="calc-btn" onclick="calcAppend('6')">6</button>
+          <button class="calc-btn op" onclick="calcAppend('-')">−</button>
+          <button class="calc-btn" onclick="calcAppend('1')">1</button>
+          <button class="calc-btn" onclick="calcAppend('2')">2</button>
+          <button class="calc-btn" onclick="calcAppend('3')">3</button>
+          <button class="calc-btn op" onclick="calcAppend('+')">+</button>
+          <button class="calc-btn" onclick="calcAppend('0')" style="grid-column:span 2">0</button>
+          <button class="calc-btn op" onclick="calcAppend('/')">/</button>
+          <button class="calc-btn eq" onclick="calcEval()">=</button>
+        </div>
+        <div class="status-msg" id="calcStatus"></div>
+      </div>
+    </div>
+    <!-- Right: Evaluation Stack Trace -->
+    <div>
+      <div class="stack-label" style="margin-bottom:10px;">EVALUATION STACK TRACE</div>
+      <div class="stack-vis" style="min-height:200px;">
+        <div class="stack-label">▲ OPERAND STACK</div>
+        <div class="stack-cells" id="evalStackCells" style="min-height:120px;">
+          <div class="stack-empty">Press = to see stack evaluation</div>
+        </div>
+      </div>
+      <div id="evalSteps" style="margin-top:12px;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ABOUT -->
+<div id="page-about" class="page">
+  <div class="mod-header">
+    <div class="mod-tag">ABOUT THIS PROJECT</div>
+    <div class="mod-title">Project Overview</div>
+  </div>
+  <div class="mod-body">
+    <div class="about-section">
+      <h3>What is this?</h3>
+      <p>This is a Data Structures project demonstrating the <strong>Stack</strong> data structure in C. A stack is used to convert infix expressions to postfix and then evaluate them — the core of any mathematical expression parser.</p>
+    </div>
+    <div class="about-section">
+      <h3>Algorithm — Infix to Postfix</h3>
+      <ul>
+        <li>Read the infix expression left to right</li>
+        <li>If operand → directly add to postfix output</li>
+        <li>If '(' → push to stack</li>
+        <li>If ')' → pop and output until '(' is found</li>
+        <li>If operator → pop higher/equal precedence operators first, then push</li>
+        <li>At end → pop all remaining from stack to output</li>
+      </ul>
+    </div>
+    <div class="about-section">
+      <h3>Precedence Rules</h3>
+      <div class="code-block">
++  -   →  precedence 1 (low)<br>
+*  /   →  precedence 2 (high)<br>
+(  )   →  grouping (not an operator)
+      </div>
+    </div>
+    <div class="about-section">
+      <h3>Modules in the C Program</h3>
+      <ul>
+        <li><strong>Stack Module</strong> — push, pop, peek, isEmpty</li>
+        <li><strong>Operator Module</strong> — isOperator, precedence</li>
+        <li><strong>Conversion Module</strong> — infixToPostfix</li>
+        <li><strong>Evaluation Module</strong> — evaluatePostfix</li>
+        <li><strong>Main Module</strong> — input/output</li>
+      </ul>
+    </div>
+    <div class="about-section">
+      <h3>Student</h3>
+      <div class="team-row">
+        <div class="avatar">S</div>
+        <div class="team-info">
+          <h4>NAHIDHA WASIM</h4>
+          <p>Data Structures Project · C Programming · Stack-Based Calculator</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // PAGE NAVIGATION
+  function showPage(id) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-' + id).classList.add('active');
+    const backEl = document.getElementById('nav-back');
+    backEl.style.display = (id === 'intro') ? 'none' : 'block';
+  }
+
+  // ===================== INPUT MODULE =====================
+  function doValidate() {
+    const expr = document.getElementById('inputExpr').value.trim();
+    const statusEl = document.getElementById('inputStatus');
+    const resultEl = document.getElementById('inputResult');
+    if (!expr) { statusEl.textContent = '⚠ Please enter an expression.'; statusEl.style.color='var(--warn)'; return; }
+
+    // Check balanced brackets
+    let depth = 0, balanced = true;
+    for (let ch of expr) {
+      if (ch === '(') depth++;
+      else if (ch === ')') { depth--; if (depth < 0) { balanced = false; break; } }
+    }
+    if (depth !== 0) balanced = false;
+
+    const operands = (expr.match(/[a-zA-Z0-9]/g) || []).length;
+    const operators = (expr.match(/[+\-*/]/g) || []).length;
+    const invalid = (expr.match(/[^a-zA-Z0-9+\-*/()]/g) || []);
+
+    if (invalid.length > 0) {
+      statusEl.textContent = '✗ Invalid characters found: ' + invalid.join(' ');
+      statusEl.style.color = 'var(--danger)';
+      resultEl.style.display = 'none';
+      return;
+    }
+    if (!balanced) {
+      statusEl.textContent = '✗ Parentheses are not balanced!';
+      statusEl.style.color = 'var(--danger)';
+      resultEl.style.display = 'none';
+      return;
+    }
+    statusEl.textContent = '✓ Valid expression! Ready to convert.';
+    statusEl.style.color = 'var(--accent)';
+    document.getElementById('inputDisplay').textContent = expr;
+    document.getElementById('inputLen').textContent = expr.replace(/\s/g,'').length;
+    document.getElementById('inputOperands').textContent = operands;
+    document.getElementById('inputOperators').textContent = operators;
+    document.getElementById('inputBrackets').textContent = balanced ? '✓' : '✗';
+    resultEl.style.display = 'block';
+  }
+
+  function sendToConvert() {
+    const expr = document.getElementById('inputExpr').value.trim();
+    document.getElementById('infixIn').value = expr;
+    showPage('convert');
+    doConvert();
+  }
+
+  // ===================== CONVERSION MODULE =====================
+  function prec(c) {
+    if (c === '+' || c === '-') return 1;
+    if (c === '*' || c === '/') return 2;
+    return 0;
+  }
+  function isOp(c) { return '+-*/'.includes(c); }
+
+  function infixToPostfix(infix) {
+    let stack = [], out = '', steps = [];
+    for (let ch of infix) {
+      if (/[a-zA-Z0-9]/.test(ch)) {
+        out += ch;
+        steps.push({ ch, action: 'Operand → output', stack: [...stack], out });
+      } else if (ch === '(') {
+        stack.push(ch);
+        steps.push({ ch, action: 'Push ( to stack', stack: [...stack], out });
+      } else if (ch === ')') {
+        while (stack.length && stack[stack.length-1] !== '(') {
+          out += stack.pop();
+          steps.push({ ch, action: 'Pop until (', stack: [...stack], out });
+        }
+        stack.pop();
+        steps.push({ ch, action: 'Discard (', stack: [...stack], out });
+      } else if (isOp(ch)) {
+        while (stack.length && prec(stack[stack.length-1]) >= prec(ch)) {
+          out += stack.pop();
+          steps.push({ ch, action: 'Pop higher/equal precedence', stack: [...stack], out });
+        }
+        stack.push(ch);
+        steps.push({ ch, action: 'Push operator', stack: [...stack], out });
+      }
+    }
+    while (stack.length) {
+      out += stack.pop();
+      steps.push({ ch: '(end)', action: 'Pop remaining', stack: [...stack], out });
+    }
+    return { postfix: out, steps };
+  }
+
+  function renderConvStack(stackArr) {
+    const c = document.getElementById('convStackCells');
+    if (!stackArr || stackArr.length === 0) {
+      c.innerHTML = '<div class="stack-empty">Stack is empty</div>'; return;
+    }
+    c.innerHTML = stackArr.map((v, i) =>
+      `<div class="stack-cell${i === stackArr.length-1 ? ' top' : ''}">
+        <span class="stack-idx">[${i}]</span>${v}
+        ${i === stackArr.length-1 ? '<span style="font-size:11px;color:var(--muted)"> ◄ TOP</span>' : ''}
+      </div>`
+    ).join('');
+  }
+
+  function doConvert() {
+    const inf = document.getElementById('infixIn').value.trim().replace(/\s/g,'');
+    if (!inf) return;
+    const { postfix, steps } = infixToPostfix(inf);
+    document.getElementById('resInfix').textContent = inf;
+    document.getElementById('resPostfix').textContent = postfix;
+    document.getElementById('convertResult').style.display = 'block';
+
+    // Show final stack state (should be empty)
+    const lastStep = steps[steps.length - 1];
+    renderConvStack(lastStep ? lastStep.stack : []);
+
+    // Send to eval button
+    const btn = document.getElementById('sendEvalBtn');
+    btn.style.display = 'inline-block';
+    btn.setAttribute('data-postfix', postfix);
+    btn.setAttribute('data-infix', inf);
+
+    const sc = document.getElementById('stepsContainer');
+    sc.innerHTML =
+      '<div class="steps-header">STEP-BY-STEP CONVERSION TRACE</div>' +
+      '<div class="step-grid-header"><span>CH</span><span>ACTION</span><span>STACK</span><span>OUTPUT</span></div>' +
+      steps.map(s =>
+        `<div class="step-row">
+          <span class="step-ch">${s.ch}</span>
+          <span class="step-act">${s.action}</span>
+          <span class="step-stk">[${s.stack.join('')}]</span>
+          <span class="step-out">${s.out || '_'}</span>
+        </div>`
+      ).join('');
+  }
+
+  function sendToEval() {
+    const btn = document.getElementById('sendEvalBtn');
+    const infix = btn.getAttribute('data-infix');
+    calcExpr = infix;
+    showPage('eval');
+    updateCalcDisplay();
+    calcEval();
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('infixIn').addEventListener('keydown', e => {
+      if (e.key === 'Enter') doConvert();
+    });
+    document.getElementById('inputExpr').addEventListener('keydown', e => {
+      if (e.key === 'Enter') doValidate();
+    });
+  });
+
+  // ===================== EVALUATION MODULE =====================
+  let calcExpr = '';
+
+  function evalPostfixWithTrace(pf) {
+    let stk = [], trace = [];
+    for (let ch of pf) {
+      if (/\d/.test(ch)) {
+        stk.push(parseInt(ch));
+        trace.push({ ch, action: 'Push operand', stack: [...stk] });
+      } else if (isOp(ch)) {
+        const b = stk.pop(), a = stk.pop();
+        let res;
+        if (ch === '+') res = a + b;
+        else if (ch === '-') res = a - b;
+        else if (ch === '*') res = a * b;
+        else if (ch === '/') res = Math.floor(a / b);
+        stk.push(res);
+        trace.push({ ch, action: `Pop ${a}, ${b} → ${a}${ch}${b} = ${res} → Push ${res}`, stack: [...stk] });
+      }
+    }
+    return { result: stk[0], trace };
+  }
+
+  function renderEvalStack(stackArr) {
+    const c = document.getElementById('evalStackCells');
+    if (!stackArr || stackArr.length === 0) {
+      c.innerHTML = '<div class="stack-empty">Stack is empty</div>'; return;
+    }
+    c.innerHTML = stackArr.map((v, i) =>
+      `<div class="stack-cell${i === stackArr.length-1 ? ' top' : ''}">
+        <span class="stack-idx">[${i}]</span>${v}
+        ${i === stackArr.length-1 ? '<span style="font-size:11px;color:var(--muted)"> ◄ TOP</span>' : ''}
+      </div>`
+    ).join('');
+  }
+
+  function updateCalcDisplay() {
+    document.getElementById('calcInfix').textContent = calcExpr || 'Enter an expression...';
+    document.getElementById('calcPostfix').textContent = '';
+    document.getElementById('calcResult').textContent = '';
+    document.getElementById('calcStatus').textContent = '';
+  }
+
+  function calcAppend(v) { calcExpr += v; updateCalcDisplay(); }
+  function calcClear() {
+    calcExpr = '';
+    document.getElementById('calcResult').textContent = '0';
+    document.getElementById('evalStackCells').innerHTML = '<div class="stack-empty">Press = to see stack evaluation</div>';
+    document.getElementById('evalSteps').innerHTML = '';
+    updateCalcDisplay();
+  }
+  function calcBack() { calcExpr = calcExpr.slice(0,-1); updateCalcDisplay(); }
+
+  function calcEval() {
+    if (!calcExpr) return;
+    try {
+      const { postfix, steps } = infixToPostfix(calcExpr);
+      const { result, trace } = evalPostfixWithTrace(postfix);
+      document.getElementById('calcPostfix').textContent = 'Postfix: ' + postfix;
+      document.getElementById('calcResult').textContent = isNaN(result) ? 'Error' : result;
+      document.getElementById('calcStatus').textContent = '';
+
+      // Show final stack
+      const lastTrace = trace[trace.length - 1];
+      renderEvalStack(lastTrace ? lastTrace.stack : []);
+
+      // Show evaluation trace
+      const es = document.getElementById('evalSteps');
+      es.innerHTML = '<div class="steps-header">EVALUATION STACK TRACE</div>' +
+        trace.map(t =>
+          `<div class="step-row">
+            <span class="step-ch">${t.ch}</span>
+            <span class="step-act">${t.action}</span>
+            <span class="step-stk">[${t.stack.join(', ')}]</span>
+          </div>`
+        ).join('');
+    } catch(e) {
+      document.getElementById('calcStatus').textContent = 'Invalid expression.';
+    }
+  }
+</script>
+</body>
+</html>
